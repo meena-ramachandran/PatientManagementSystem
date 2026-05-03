@@ -1,0 +1,41 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "BillingServiceApplication",
+            "request": "launch",
+            "mainClass": "com.pm.billingservice.BillingServiceApplication",
+            "projectName": "billing-service"
+        },
+        {
+            "type": "java",
+            "name": "Run PatientService",
+            "request": "launch",
+            "mainClass": "com.pm.patientservice.PatientServiceApplication",
+            "projectName": "patient-service",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "dev"
+            },
+            "vmArgs": "-Dserver.port=4000"
+        },
+        {
+            "type": "java",
+            "name": "Debug PatientService",
+            "request": "launch",
+            "mainClass": "com.pm.patientservice.PatientServiceApplication",
+            "projectName": "patient-service",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "dev"
+            },
+            "vmArgs": "-Xmx512m -Dserver.port=4000"
+        },
+        {
+            "type": "java",
+            "name": "Attach Remote Debugger",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5005
+        }
+    ]
+}
