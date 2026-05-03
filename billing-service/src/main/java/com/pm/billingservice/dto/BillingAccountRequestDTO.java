@@ -2,6 +2,7 @@ package com.pm.billingservice.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import java.math.BigDecimal;
 
 public class BillingAccountRequestDTO {
 
@@ -17,6 +18,8 @@ public class BillingAccountRequestDTO {
 
     @NotBlank
     private String status;
+
+    private BigDecimal balance;
 
     public String getPatientId() {
         return patientId;
@@ -48,5 +51,13 @@ public class BillingAccountRequestDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public java.math.BigDecimal getBalance() {
+        return balance;
+    }
+
+    public void setBalance(java.math.BigDecimal balance) {
+        this.balance = balance;
     }
 }

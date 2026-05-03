@@ -110,6 +110,7 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_SQL_INIT_MODE: always
       JWT_SECRET: myverylongsecretkeyforjwtauthentication12345678
+      GRPC_SERVER_PORT: 9097
     networks:
       - internal
     depends_on:
@@ -135,6 +136,55 @@ services:
     depends_on:
       analytics-service-db:
         condition: service_healthy
+
+  appointment-service-db:
+    image: postgres:15
+    container_name: appointment-service-db
+    environment:
+      POSTGRES_DB: appointmentdb
+      POSTGRES_USER: admin_viewer
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5005:5432"
+    volumes:
+      - ~/db_volumes/appointment-service-db:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin_viewer -d appointmentdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  appointment-service:
+    build:
+      context: ./appointment-service
+      dockerfile: Dockerfile
+    image: appointment-service:latest
+    container_name: appointment-service
+    ports:
+      - "4006:4006"
+      - "9096:9096"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://appointment-service-db:5432/appointmentdb
+      SPRING_DATASOURCE_USERNAME: admin_viewer
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: always
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      AUTH_SERVICE_ADDRESS: auth-service
+      AUTH_SERVICE_PORT: 9097
+      BILLING_SERVICE_ADDRESS: billing-service
+      BILLING_SERVICE_PORT: 9095
+    networks:
+      - internal
+    depends_on:
+      appointment-service-db:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      billing-service:
+        condition: service_started
 
   billing-service:
     build:

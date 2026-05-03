@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.pm.billingservice.dto.BillingAccountRequestDTO;
 import com.pm.billingservice.dto.BillingAccountResponseDTO;
+import com.pm.billingservice.dto.BillingBalanceRequestDTO;
 import com.pm.billingservice.service.BillingAccountService;
 
 @RestController
@@ -49,6 +50,18 @@ public class BillingAccountController {
     public ResponseEntity<BillingAccountResponseDTO> update(@PathVariable UUID id,
             @Valid @RequestBody BillingAccountRequestDTO request) {
         return ResponseEntity.ok(billingAccountService.updateAccount(id, request));
+    }
+
+    @PostMapping("/{id}/credit")
+    public ResponseEntity<BillingAccountResponseDTO> creditBalance(@PathVariable UUID id,
+            @Valid @RequestBody BillingBalanceRequestDTO request) {
+        return ResponseEntity.ok(billingAccountService.creditBalance(id, request.getAmount()));
+    }
+
+    @PostMapping("/{id}/charge")
+    public ResponseEntity<BillingAccountResponseDTO> chargeBalance(@PathVariable UUID id,
+            @Valid @RequestBody BillingBalanceRequestDTO request) {
+        return ResponseEntity.ok(billingAccountService.chargeBalance(id, request.getAmount()));
     }
 
     @DeleteMapping("/{id}")

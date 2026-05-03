@@ -75,6 +75,14 @@ public class PatientService {
         if (!patientRepository.existsById(id)) {
             throw new PatientNotFoundException("Patient not found with id: " + id);
         }
+
+        billingServiceGrpcClient.deleteBillingAccountByPatientId(id.toString());
         patientRepository.deleteById(id);
+    }
+
+    public PatientResponseDTO getPatient(UUID id) {
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() -> new PatientNotFoundException("Patient not found with id: " + id));
+        return PatientMapper.toPatientResponseDTO(patient);
     }
 }

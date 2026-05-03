@@ -5,6 +5,8 @@ import billing.BillingServiceGrpc;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,63 @@ public class BillingGrpcService extends BillingServiceGrpc.BillingServiceImplBas
         BillingResponse response = BillingResponse.newBuilder()
                 .setAccountId(account.getId())
                 .setStatus(account.getStatus())
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void creditBillingAccount(billing.BillingAmountRequest request,
+            StreamObserver<billing.BillingResponse> responseObserver) {
+        log.info("creditBillingAccount request received: {}", request.toString());
+        if (request.getAccountId().isBlank()) {
+            responseObserver.onError(new IllegalArgumentException("Missing accountId for credit operation"));
+            return;
+        }
+
+        var account = billingAccountService.creditBalance(UUID.fromString(request.getAccountId()),
+                new java.math.BigDecimal(request.getAmount()));
+
+        BillingResponse response = BillingResponse.newBuilder()
+                .setAccountId(account.getId())
+                .setStatus(account.getStatus())
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void chargeBillingAccount(billing.BillingAmountRequest request,
+            StreamObserver<billing.BillingResponse> responseObserver) {
+        log.info("chargeBillingAccount request received: {}", request.toString());
+        if (request.getAccountId().isBlank()) {
+            responseObserver.onError(new IllegalArgumentException("Missing accountId for charge operation"));
+            return;
+        }
+
+        var account = billingAccountService.chargeBalance(UUID.fromString(request.getAccountId()),
+                new java.math.BigDecimal(request.getAmount()));
+
+        BillingResponse response = BillingResponse.newBuilder()
+                .setAccountId(account.getId())
+                .setStatus(account.getStatus())
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void deleteBillingAccountByPatientId(billing.BillingPatientRequest request,
+            StreamObserver<billing.BillingResponse> responseObserver) {
+        log.info("deleteBillingAccountByPatientId request received: {}", request.toString());
+        var account = billingAccountService.deleteAccountByPatientId(request.getPatientId());
+
+        BillingResponse response = BillingResponse.newBuilder()
+                .setAccountId(account.getId())
+                .setStatus("DELETED")
                 .build();
 
         responseObserver.onNext(response);

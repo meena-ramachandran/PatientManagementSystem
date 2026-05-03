@@ -36,4 +36,33 @@ public class BillingServiceGrpcClient {
         log.info("Received response from BillingService via gRPC: {}", response.toString());
         return response;
     }
+
+    public billing.BillingResponse creditBillingAccount(String accountId, String amount) {
+        billing.BillingAmountRequest request = billing.BillingAmountRequest.newBuilder()
+                .setAccountId(accountId)
+                .setAmount(amount)
+                .build();
+        BillingResponse response = blockingStub.creditBillingAccount(request);
+        log.info("Received credit response from BillingService via gRPC: {}", response.toString());
+        return response;
+    }
+
+    public billing.BillingResponse chargeBillingAccount(String accountId, String amount) {
+        billing.BillingAmountRequest request = billing.BillingAmountRequest.newBuilder()
+                .setAccountId(accountId)
+                .setAmount(amount)
+                .build();
+        BillingResponse response = blockingStub.chargeBillingAccount(request);
+        log.info("Received charge response from BillingService via gRPC: {}", response.toString());
+        return response;
+    }
+
+    public billing.BillingResponse deleteBillingAccountByPatientId(String patientId) {
+        billing.BillingPatientRequest request = billing.BillingPatientRequest.newBuilder()
+                .setPatientId(patientId)
+                .build();
+        BillingResponse response = blockingStub.deleteBillingAccountByPatientId(request);
+        log.info("Received delete-by-patient response from BillingService via gRPC: {}", response.toString());
+        return response;
+    }
 }

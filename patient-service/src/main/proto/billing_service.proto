@@ -5,12 +5,25 @@ option java_package = "billing";
 
 service BillingService {
     rpc CreateBillingAccount(BillingRequest) returns (BillingResponse);
+    rpc CreditBillingAccount(BillingAmountRequest) returns (BillingResponse);
+    rpc ChargeBillingAccount(BillingAmountRequest) returns (BillingResponse);
+    rpc DeleteBillingAccountByPatientId(BillingPatientRequest) returns (BillingResponse);
 }
 
 message BillingRequest {
     string patientId = 1;
     string name = 2;
     string email = 3;
+}
+
+message BillingAmountRequest {
+    string accountId = 1;
+    string patientId = 2;
+    string amount = 3;
+}
+
+message BillingPatientRequest {
+    string patientId = 1;
 }
 
 message BillingResponse {

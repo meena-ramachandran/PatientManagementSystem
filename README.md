@@ -1,65 +1,74 @@
-# PMS2 Microservice Platform
+# Patient Management System Microservice Platform
 
-## Patient Management System
+## Overview
 
-It is a modern Spring Boot microservice platform built as a healthcare / patient management demo.
-It is designed to show a complete microservice flow with API gateway routing, authentication, PostgreSQL persistence, Kafka event ingestion, and service-to-service communication.
+This repository contains a Java 21 Spring Boot microservices platform for a healthcare-style patient management system.
+It demonstrates a complete backend flow using:
+- API gateway routing
+- JWT authentication
+- PostgreSQL-backed service databases
+- gRPC service-to-service communication
+- Kafka analytics ingestion
+- Docker Compose container orchestration
 
-## Salient Features
+## What this project shows
 
-- Fully containerized multi-service architecture
-- API gateway with route rewriting and JWT validation
-- Dedicated PostgreSQL database per service
-- Kafka-driven analytics ingestion
-- Service-level unit tests and Spring Boot test support
+- Modern service separation with independent data stores
+- External requests through a Spring Cloud Gateway
+- Authenticated API access with JWT validation
+- Patient lifecycle management linked to billing and appointments
+- Billing account creation and automatic appointment charge/refund logic
+- Kafka-based analytics event processing
 
 ## Services
 
-- **api-gateway** — Spring Cloud Gateway entry point for HTTP traffic
-- **auth-service** — JWT-based authentication and token management
-- **patient-service** — patient profile CRUD and domain data
-- **billing-service** — billing account CRUD backed by PostgreSQL
-- **analytics-service** — Kafka consumer for analytics events + PostgreSQL persistence
-- **kafka** — message broker for event-driven analytics
-- **PostgreSQL** — separate DB containers for patient, auth, billing, and analytics
+- **api-gateway** — public entrypoint and route proxy
+- **auth-service** — JWT authentication, user management, token validation
+- **patient-service** — patient CRUD, onboarding, and billing account creation via gRPC
+- **billing-service** — billing account CRUD, charge/credit operations, gRPC API
+- **appointment-service** — appointment lifecycle, appointment fees, and billing adjustments
+- **analytics-service** — Kafka consumer that persists analytics events
+- **kafka** — message broker for analytics events
+- **PostgreSQL** — dedicated DB containers for each service
 
-## Architecture and flow
+## Architecture and data flow
 
 1. Client requests enter through the **API gateway** at `localhost:4007`.
-2. The gateway routes requests to downstream services according to path rules.
-3. Protected APIs require JWT validation via gateway filters.
-4. The **auth-service** issues JWT tokens for authenticated users.
-5. The **patient-service** manages patient records.
-6. The **billing-service** stores billing accounts in `billingdb`.
-7. The **analytics-service** consumes Kafka messages from the `patient` topic, parses protobuf `PatientEvent` payloads, and stores analytics records in `analyticsdb`.
+2. The gateway routes requests to downstream services and enforces JWT authorization.
+3. The **auth-service** issues JWT tokens and validates requests.
+4. The **patient-service** manages patient records and creates billing accounts over gRPC.
+5. The **appointment-service** handles appointment creation, update, and deletion, then charges or refunds billing accounts.
+6. The **billing-service** stores billing accounts and exposes both REST and gRPC access.
+7. The **analytics-service** consumes Kafka events and saves analytics data.
 
 ## Technology stack
 
-| Layer            | Technology.             |
-|------------------|-------------------------|
-| Language         | Java 21                 |
-| Web framework    | Spring Boot 4           |
-| API gateway      | Spring Cloud Gateway    |
-| Persistence      | Spring Data JPA         |
-| Messaging.       | Spring Kafka            |
-| Database         | PostgreSQL              |
-| Test DB          | H2 in-memory            |
-| Serialization    | Protocol Buffers / gRPC |
-| Containerization | Docker / Docker Compose |
+| Layer            | Technology                |
+|------------------|---------------------------|
+| Language         | Java 21                   |
+| Framework        | Spring Boot 4             |
+| Gateway          | Spring Cloud Gateway      |
+| Persistence      | Spring Data JPA           |
+| Messaging        | Spring Kafka              |
+| Database         | PostgreSQL                |
+| RPC              | gRPC / Protocol Buffers   |
+| Containerization | Docker / Docker Compose   |
 
 ## Service ports
 
-- `api-gateway`: `4007`
-- `patient-service`: `4000`
-- `auth-service`: `4005`
-- `billing-service`: `4002`
-- `analytics-service`: `4004`
-- `kafka`: `9092`
+- `api-gateway` — `4007`
+- `patient-service` — `4000`
+- `auth-service` — `4005`
+- `billing-service` — `4002`
+- `appointment-service` — `4006`
+- `analytics-service` — `4004`
+- `kafka` — `9092`
 
 ## API Gateway routing
 
 ### Auth
-- `POST /auth/**` → `auth-service`
+- `POST /auth/login` → `auth-service`
+- `POST /auth/users` → `auth-service`
 - `GET /api-docs/auth` → `auth-service` OpenAPI docs
 
 ### Patient
@@ -67,6 +76,12 @@ It is designed to show a complete microservice flow with API gateway routing, au
 
 ### Billing
 - `GET /api/billing/**` → `billing-service` rewritten to `/billing-accounts/**`
+- `POST /api/billing/{id}/credit` → billing credit endpoint
+- `POST /api/billing/{id}/charge` → billing charge endpoint
+
+### Appointment
+- `GET /api/appointments/**` → `appointment-service`
+- `POST /api/appointments` → `appointment-service`
 
 ### Analytics
 - `GET /api/analytics/**` → `analytics-service` rewritten to `/analytics-events/**`
@@ -75,30 +90,29 @@ It is designed to show a complete microservice flow with API gateway routing, au
 - `GET /api-docs/patients` → `patient-service`
 - `GET /api-docs/billing` → `billing-service`
 - `GET /api-docs/analytics` → `analytics-service`
+- `GET /api-docs/appointments` → `appointment-service`
 
-## Data persistence
+## Persistence
 
-Each stateful service has its own PostgreSQL database container:
+Each service has its own PostgreSQL database container:
 
 - `patient-service-db` → `patientdb`
 - `auth-service-db` → `patientdb`
 - `billing-service-db` → `billingdb`
+- `appointment-service-db` → `appointmentdb`
 - `analytics-service-db` → `analyticsdb`
 
-All databases use a shared service user `admin_viewer` with password `password`, but each service is isolated into its own database.
+All databases use `admin_viewer` / `password` for service connectivity. This keeps each service data isolated while still allowing independent startup and migration.
 
-## 📡 Analytics event flow
+## Business flow
 
-- The `analytics-service` listens to Kafka topic `patient`.
-- Incoming messages are protobuf-encoded `PatientEvent` records.
-- The service deserializes the event, maps the payload into analytics data, and saves it to PostgreSQL.
+- Patient creation triggers a gRPC call from `patient-service` to `billing-service` to create a billing account.
+- Appointment creation charges the billing account automatically.
+- Appointment updates compare the previous fee and apply a charge or credit for the difference.
+- Appointment deletion refunds the full appointment fee back to billing.
+- Analytics events can be produced and consumed via Kafka to verify event-driven behavior.
 
-## 🧪 Testing
-
-This repo includes a dedicated test setup for each service and also integration tests
-
-
-## ▶️ Run locally
+## Run locally
 
 From the repository root:
 
@@ -106,66 +120,63 @@ From the repository root:
 docker compose up --build
 ```
 
-This boots:
-- 4 Spring Boot microservices
-- 4 PostgreSQL containers
+That starts:
+- all backend services
+- 5 PostgreSQL containers
 - Kafka broker
 - API gateway
 
-## 🌍 Local URLs
+## Local URLs
 
 - API gateway: `http://localhost:4007`
 - Billing service: `http://localhost:4002`
 - Analytics service: `http://localhost:4004`
 - Auth service: `http://localhost:4005`
 - Patient service: `http://localhost:4000`
+- Appointment service: `http://localhost:4006`
 
-## ✅ Why this setup is useful
+## Quick test flow
 
-- Demonstrates a real microservice routing pattern
-- Separates concerns by service boundaries
-- Uses Kafka for asynchronous analytics ingestion
-- Shows how to wire gateway rewrite rules to controller paths
-- Includes a test-friendly setup for CI-style service validation
+1. Create a user via `POST http://localhost:4007/auth/users`
+2. Log in via `POST http://localhost:4007/auth/login`
+3. Create a patient via `POST http://localhost:4007/api/patients`
+4. Create an appointment via `POST http://localhost:4007/api/appointments`
+5. Verify billing and appointment state via GET endpoints
+6. Update or delete the appointment to confirm billing adjustments
 
-## �️ Implementation details
+## Why this setup matters
 
-- `api-gateway` uses Spring Cloud Gateway routes and rewrite filters to map public `/api/billing/**` and `/api/analytics/**` paths to internal controller paths.
-- `auth-service` is a Spring Boot app exposing JWT authentication endpoints and token management.
-- `patient-service` exposes patient CRUD APIs and is backed by PostgreSQL via Spring Data JPA.
-- `patient-service` also uses a gRPC client (`BillingServiceGrpcClient`) to call `billing-service` for billing account creation during patient onboarding.
-- `billing-service` is built with a standard controller-service-repository pattern:
-  - `BillingAccountController` handles HTTP endpoints.
-  - `BillingAccountService` contains business logic and validation.
-  - `BillingAccountRepository` persists `BillingAccount` entities in PostgreSQL.
-  - `BillingGrpcService` exposes a gRPC endpoint for inter-service communication.
-- `analytics-service` includes:
-  - `AnalyticsEventController` for HTTP CRUD.
-  - `AnalyticsEventService` for event business logic.
-  - `AnalyticsEventRepository` for JPA persistence.
-  - `KafkaConsumer` listening on the `patient` topic and converting protobuf `PatientEvent` payloads into analytics records.
-- Both billing and analytics services use `spring.datasource.*` environment-based configuration so Docker Compose can point them to their own PostgreSQL containers.
-- The analytics service test profile uses H2 in-memory DB and disables Kafka auto-configuration so unit tests are fast and isolated.
-## 🚢 Deployment
+- Demonstrates a real microservices architecture with independent state
+- Shows JWT-secured gateway routing and API rewriting
+- Uses gRPC for internal service interactions and PostgreSQL for persistence
+- Illustrates billing automation tied to appointment lifecycle
+- Includes event-driven analytics with Kafka and separate persistence
 
-The easiest deployment path is Docker Compose.
+## Implementation highlights
 
-1. From the repository root, build and start all services:
+- `api-gateway` routes external requests and applies JWT validation filters
+- `auth-service` provides user management and token issuance
+- `patient-service` handles patient CRUD and billing onboarding via gRPC
+- `billing-service` exposes REST + gRPC billing operations and maintains account state
+- `appointment-service` applies billing logic for fees, updates, and refunds
+- `analytics-service` consumes Kafka events and stores analytics records
+
+## Deployment notes
+
+Use Docker Compose for the full stack:
 
 ```bash
 docker compose up --build
 ```
 
-2. Confirm the gateway is running at `http://localhost:4007`.
-3. If you want to run services individually, use the service folders and Maven:
+If you prefer to run services individually for development:
 
 ```bash
 cd billing-service
 ./mvnw spring-boot:run
 ```
 
-For a production-like environment, deploy each service as a separate container and configure environment variables:
-
+Environment variables for each service include:
 - `SPRING_DATASOURCE_URL`
 - `SPRING_DATASOURCE_USERNAME`
 - `SPRING_DATASOURCE_PASSWORD`
@@ -173,52 +184,43 @@ For a production-like environment, deploy each service as a separate container a
 - `SPRING_KAFKA_BOOTSTRAP_SERVERS`
 - `JWT_SECRET` for `auth-service`
 
-### Recommended deployment flow
+### Recommended start order
 
-- Start PostgreSQL containers first.
-- Start Kafka and ensure the broker is available.
-- Start backend services in the order: `auth-service`, `patient-service`, `billing-service`, `analytics-service`.
-- Start `api-gateway` last so all routes are available.
+1. PostgreSQL databases
+2. Kafka broker
+3. `auth-service`
+4. `billing-service`
+5. `patient-service`
+6. `appointment-service`
+7. `analytics-service`
+8. `api-gateway`
 
-## 🧭 Architecture diagram
+## Architecture diagram
 
 ```mermaid
 flowchart LR
-    client[Client] -->|HTTP| gateway[API Gateway]
-    gateway --> auth[Auth Service]
-    gateway --> patient[Patient Service]
-    gateway --> billing[Billing Service]
-    gateway --> analytics[Analytics Service]
-    billing --> billingdb[(PostgreSQL billingdb)]
-    analytics --> analyticsdb[(PostgreSQL analyticsdb)]
-    patient --> patientdb[(PostgreSQL patientdb)]
-    auth --> authdb[(PostgreSQL patientdb)]
-    patient -. gRPC .-> billing
-    kafka[Kafka Broker] --> analytics
-    client -. JWT .-> gateway
+    Client -->|HTTP| Gateway[API Gateway]
+    Gateway --> Auth[Auth Service]
+    Gateway --> Patient[Patient Service]
+    Gateway --> Billing[Billing Service]
+    Gateway --> Appointment[Appointment Service]
+    Gateway --> Analytics[Analytics Service]
+    Patient -. gRPC .-> Billing
+    Billing --> BillingDB[(PostgreSQL billingdb)]
+    Patient --> PatientDB[(PostgreSQL patientdb)]
+    Appointment --> AppointmentDB[(PostgreSQL appointmentdb)]
+    Analytics --> AnalyticsDB[(PostgreSQL analyticsdb)]
+    Kafka[(Kafka broker)] --> Analytics
+    Auth --> AuthDB[(PostgreSQL patientdb)]
+    Client -. JWT .-> Gateway
 ```
 
-## 🔄 Flow chart
-
-```mermaid
-flowchart TD
-    A[Client request] --> B[API Gateway]
-    B --> C{Route match}
-    C -->|/auth/**| D[Auth Service]
-    C -->|/api/patients/**| E[Patient Service]
-    C -->|/api/billing/**| F[Billing Service]
-    C -->|/api/analytics/**| G[Analytics Service]
-    F --> H[Billing DB]
-    G --> I[Analytics DB]
-    D --> J[JWT Token]
-    G --> K[Kafka consumer]
-    K --> I
-```
-## �🗂 Project structure
+## Project structure
 
 - `api-gateway/` — gateway configuration and route rules
-- `auth-service/` — auth logic and JWT token service
-- `patient-service/` — patient domain and persistence
-- `billing-service/` — billing CRUD and database operations
-- `analytics-service/` — Kafka consumer, analytics persistence, tests
-- `docker-compose.yml` — orchestration for the full stack
+- `auth-service/` — authentication and user management
+- `patient-service/` — patient domain and billing onboarding
+- `billing-service/` — billing account management and gRPC API
+- `appointment-service/` — appointment lifecycle and billing automation
+- `analytics-service/` — Kafka analytics ingestion and persistence
+- `docker-compose.yml` — full-stack orchestration

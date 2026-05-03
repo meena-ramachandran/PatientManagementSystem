@@ -43,6 +43,14 @@ spring:
                     - RewritePath=/api/analytics(?<remaining>/?.*),/analytics-events${remaining}
                     - JwtValidation
 
+                - id: appointment-service-route
+                  uri: http://appointment-service:4006
+                  predicates:
+                    - Path=/api/appointments/**
+                  filters:
+                    - StripPrefix=1
+                    - JwtValidation
+
                 - id: api-docs-patient-route
                   uri: http://patient-service:4000
                   predicates:
@@ -63,3 +71,10 @@ spring:
                     - Path=/api-docs/analytics
                   filters:
                     - RewritePath=/api-docs/analytics,/v3/api-docs
+
+                - id: api-docs-appointment-route
+                  uri: http://appointment-service:4006
+                  predicates:
+                    - Path=/api-docs/appointments
+                  filters:
+                    - RewritePath=/api-docs/appointments,/v3/api-docs

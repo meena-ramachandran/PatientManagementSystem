@@ -23,6 +23,9 @@ public class BillingAccountMapper {
         account.setName(request.getName());
         account.setEmail(request.getEmail());
         account.setStatus(request.getStatus());
+        if (request.getBalance() != null) {
+            account.setBalance(request.getBalance());
+        }
         return account;
     }
 }
