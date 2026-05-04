@@ -46,7 +46,7 @@ It demonstrates a complete backend flow using:
 | Layer            | Technology                |
 |------------------|---------------------------|
 | Language         | Java 21                   |
-| Framework        | Spring Boot 4             |
+| Framework        | Spring Boot 3.x           |
 | Gateway          | Spring Cloud Gateway      |
 | Persistence      | Spring Data JPA           |
 | Messaging        | Spring Kafka              |
