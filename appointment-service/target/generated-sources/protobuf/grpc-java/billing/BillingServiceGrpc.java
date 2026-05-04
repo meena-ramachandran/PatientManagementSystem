@@ -46,6 +46,99 @@ public final class BillingServiceGrpc {
     return getCreateBillingAccountMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<billing.BillingAmountRequest,
+      billing.BillingResponse> getCreditBillingAccountMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreditBillingAccount",
+      requestType = billing.BillingAmountRequest.class,
+      responseType = billing.BillingResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<billing.BillingAmountRequest,
+      billing.BillingResponse> getCreditBillingAccountMethod() {
+    io.grpc.MethodDescriptor<billing.BillingAmountRequest, billing.BillingResponse> getCreditBillingAccountMethod;
+    if ((getCreditBillingAccountMethod = BillingServiceGrpc.getCreditBillingAccountMethod) == null) {
+      synchronized (BillingServiceGrpc.class) {
+        if ((getCreditBillingAccountMethod = BillingServiceGrpc.getCreditBillingAccountMethod) == null) {
+          BillingServiceGrpc.getCreditBillingAccountMethod = getCreditBillingAccountMethod =
+              io.grpc.MethodDescriptor.<billing.BillingAmountRequest, billing.BillingResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreditBillingAccount"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  billing.BillingAmountRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  billing.BillingResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new BillingServiceMethodDescriptorSupplier("CreditBillingAccount"))
+              .build();
+        }
+      }
+    }
+    return getCreditBillingAccountMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<billing.BillingAmountRequest,
+      billing.BillingResponse> getChargeBillingAccountMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ChargeBillingAccount",
+      requestType = billing.BillingAmountRequest.class,
+      responseType = billing.BillingResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<billing.BillingAmountRequest,
+      billing.BillingResponse> getChargeBillingAccountMethod() {
+    io.grpc.MethodDescriptor<billing.BillingAmountRequest, billing.BillingResponse> getChargeBillingAccountMethod;
+    if ((getChargeBillingAccountMethod = BillingServiceGrpc.getChargeBillingAccountMethod) == null) {
+      synchronized (BillingServiceGrpc.class) {
+        if ((getChargeBillingAccountMethod = BillingServiceGrpc.getChargeBillingAccountMethod) == null) {
+          BillingServiceGrpc.getChargeBillingAccountMethod = getChargeBillingAccountMethod =
+              io.grpc.MethodDescriptor.<billing.BillingAmountRequest, billing.BillingResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ChargeBillingAccount"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  billing.BillingAmountRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  billing.BillingResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new BillingServiceMethodDescriptorSupplier("ChargeBillingAccount"))
+              .build();
+        }
+      }
+    }
+    return getChargeBillingAccountMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<billing.BillingPatientRequest,
+      billing.BillingResponse> getDeleteBillingAccountByPatientIdMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteBillingAccountByPatientId",
+      requestType = billing.BillingPatientRequest.class,
+      responseType = billing.BillingResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<billing.BillingPatientRequest,
+      billing.BillingResponse> getDeleteBillingAccountByPatientIdMethod() {
+    io.grpc.MethodDescriptor<billing.BillingPatientRequest, billing.BillingResponse> getDeleteBillingAccountByPatientIdMethod;
+    if ((getDeleteBillingAccountByPatientIdMethod = BillingServiceGrpc.getDeleteBillingAccountByPatientIdMethod) == null) {
+      synchronized (BillingServiceGrpc.class) {
+        if ((getDeleteBillingAccountByPatientIdMethod = BillingServiceGrpc.getDeleteBillingAccountByPatientIdMethod) == null) {
+          BillingServiceGrpc.getDeleteBillingAccountByPatientIdMethod = getDeleteBillingAccountByPatientIdMethod =
+              io.grpc.MethodDescriptor.<billing.BillingPatientRequest, billing.BillingResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteBillingAccountByPatientId"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  billing.BillingPatientRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  billing.BillingResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new BillingServiceMethodDescriptorSupplier("DeleteBillingAccountByPatientId"))
+              .build();
+        }
+      }
+    }
+    return getDeleteBillingAccountByPatientIdMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -100,6 +193,27 @@ public final class BillingServiceGrpc {
         io.grpc.stub.StreamObserver<billing.BillingResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateBillingAccountMethod(), responseObserver);
     }
+
+    /**
+     */
+    default void creditBillingAccount(billing.BillingAmountRequest request,
+        io.grpc.stub.StreamObserver<billing.BillingResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreditBillingAccountMethod(), responseObserver);
+    }
+
+    /**
+     */
+    default void chargeBillingAccount(billing.BillingAmountRequest request,
+        io.grpc.stub.StreamObserver<billing.BillingResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getChargeBillingAccountMethod(), responseObserver);
+    }
+
+    /**
+     */
+    default void deleteBillingAccountByPatientId(billing.BillingPatientRequest request,
+        io.grpc.stub.StreamObserver<billing.BillingResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteBillingAccountByPatientIdMethod(), responseObserver);
+    }
   }
 
   /**
@@ -136,6 +250,30 @@ public final class BillingServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getCreateBillingAccountMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void creditBillingAccount(billing.BillingAmountRequest request,
+        io.grpc.stub.StreamObserver<billing.BillingResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreditBillingAccountMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void chargeBillingAccount(billing.BillingAmountRequest request,
+        io.grpc.stub.StreamObserver<billing.BillingResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getChargeBillingAccountMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void deleteBillingAccountByPatientId(billing.BillingPatientRequest request,
+        io.grpc.stub.StreamObserver<billing.BillingResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeleteBillingAccountByPatientIdMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -159,6 +297,27 @@ public final class BillingServiceGrpc {
     public billing.BillingResponse createBillingAccount(billing.BillingRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getCreateBillingAccountMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public billing.BillingResponse creditBillingAccount(billing.BillingAmountRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreditBillingAccountMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public billing.BillingResponse chargeBillingAccount(billing.BillingAmountRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getChargeBillingAccountMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public billing.BillingResponse deleteBillingAccountByPatientId(billing.BillingPatientRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeleteBillingAccountByPatientIdMethod(), getCallOptions(), request);
     }
   }
 
@@ -185,9 +344,36 @@ public final class BillingServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getCreateBillingAccountMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<billing.BillingResponse> creditBillingAccount(
+        billing.BillingAmountRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreditBillingAccountMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<billing.BillingResponse> chargeBillingAccount(
+        billing.BillingAmountRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getChargeBillingAccountMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<billing.BillingResponse> deleteBillingAccountByPatientId(
+        billing.BillingPatientRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeleteBillingAccountByPatientIdMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_CREATE_BILLING_ACCOUNT = 0;
+  private static final int METHODID_CREDIT_BILLING_ACCOUNT = 1;
+  private static final int METHODID_CHARGE_BILLING_ACCOUNT = 2;
+  private static final int METHODID_DELETE_BILLING_ACCOUNT_BY_PATIENT_ID = 3;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -208,6 +394,18 @@ public final class BillingServiceGrpc {
       switch (methodId) {
         case METHODID_CREATE_BILLING_ACCOUNT:
           serviceImpl.createBillingAccount((billing.BillingRequest) request,
+              (io.grpc.stub.StreamObserver<billing.BillingResponse>) responseObserver);
+          break;
+        case METHODID_CREDIT_BILLING_ACCOUNT:
+          serviceImpl.creditBillingAccount((billing.BillingAmountRequest) request,
+              (io.grpc.stub.StreamObserver<billing.BillingResponse>) responseObserver);
+          break;
+        case METHODID_CHARGE_BILLING_ACCOUNT:
+          serviceImpl.chargeBillingAccount((billing.BillingAmountRequest) request,
+              (io.grpc.stub.StreamObserver<billing.BillingResponse>) responseObserver);
+          break;
+        case METHODID_DELETE_BILLING_ACCOUNT_BY_PATIENT_ID:
+          serviceImpl.deleteBillingAccountByPatientId((billing.BillingPatientRequest) request,
               (io.grpc.stub.StreamObserver<billing.BillingResponse>) responseObserver);
           break;
         default:
@@ -235,6 +433,27 @@ public final class BillingServiceGrpc {
               billing.BillingRequest,
               billing.BillingResponse>(
                 service, METHODID_CREATE_BILLING_ACCOUNT)))
+        .addMethod(
+          getCreditBillingAccountMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              billing.BillingAmountRequest,
+              billing.BillingResponse>(
+                service, METHODID_CREDIT_BILLING_ACCOUNT)))
+        .addMethod(
+          getChargeBillingAccountMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              billing.BillingAmountRequest,
+              billing.BillingResponse>(
+                service, METHODID_CHARGE_BILLING_ACCOUNT)))
+        .addMethod(
+          getDeleteBillingAccountByPatientIdMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              billing.BillingPatientRequest,
+              billing.BillingResponse>(
+                service, METHODID_DELETE_BILLING_ACCOUNT_BY_PATIENT_ID)))
         .build();
   }
 
@@ -284,6 +503,9 @@ public final class BillingServiceGrpc {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new BillingServiceFileDescriptorSupplier())
               .addMethod(getCreateBillingAccountMethod())
+              .addMethod(getCreditBillingAccountMethod())
+              .addMethod(getChargeBillingAccountMethod())
+              .addMethod(getDeleteBillingAccountByPatientIdMethod())
               .build();
         }
       }

@@ -21,6 +21,16 @@ public final class BillingServiceOuterClass {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_BillingRequest_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_BillingAmountRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_BillingAmountRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_BillingPatientRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_BillingPatientRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
     internal_static_BillingResponse_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -36,11 +46,19 @@ public final class BillingServiceOuterClass {
     java.lang.String[] descriptorData = {
       "\n\025billing_service.proto\"@\n\016BillingReques" +
       "t\022\021\n\tpatientId\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\r\n\005em" +
-      "ail\030\003 \001(\t\"4\n\017BillingResponse\022\021\n\taccountI" +
-      "d\030\001 \001(\t\022\016\n\006status\030\002 \001(\t2K\n\016BillingServic" +
-      "e\0229\n\024CreateBillingAccount\022\017.BillingReque" +
-      "st\032\020.BillingResponseB\013\n\007billingP\001b\006proto" +
-      "3"
+      "ail\030\003 \001(\t\"L\n\024BillingAmountRequest\022\021\n\tacc" +
+      "ountId\030\001 \001(\t\022\021\n\tpatientId\030\002 \001(\t\022\016\n\006amoun" +
+      "t\030\003 \001(\t\"*\n\025BillingPatientRequest\022\021\n\tpati" +
+      "entId\030\001 \001(\t\"4\n\017BillingResponse\022\021\n\taccoun" +
+      "tId\030\001 \001(\t\022\016\n\006status\030\002 \001(\t2\232\002\n\016BillingSer" +
+      "vice\0229\n\024CreateBillingAccount\022\017.BillingRe" +
+      "quest\032\020.BillingResponse\022?\n\024CreditBilling" +
+      "Account\022\025.BillingAmountRequest\032\020.Billing" +
+      "Response\022?\n\024ChargeBillingAccount\022\025.Billi" +
+      "ngAmountRequest\032\020.BillingResponse\022K\n\037Del" +
+      "eteBillingAccountByPatientId\022\026.BillingPa" +
+      "tientRequest\032\020.BillingResponseB\013\n\007billin" +
+      "gP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -52,8 +70,20 @@ public final class BillingServiceOuterClass {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_BillingRequest_descriptor,
         new java.lang.String[] { "PatientId", "Name", "Email", });
-    internal_static_BillingResponse_descriptor =
+    internal_static_BillingAmountRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
+    internal_static_BillingAmountRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_BillingAmountRequest_descriptor,
+        new java.lang.String[] { "AccountId", "PatientId", "Amount", });
+    internal_static_BillingPatientRequest_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_BillingPatientRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_BillingPatientRequest_descriptor,
+        new java.lang.String[] { "PatientId", });
+    internal_static_BillingResponse_descriptor =
+      getDescriptor().getMessageTypes().get(3);
     internal_static_BillingResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_BillingResponse_descriptor,

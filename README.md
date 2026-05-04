@@ -20,6 +20,19 @@ It demonstrates a complete backend flow using:
 - Billing account creation and automatic appointment charge/refund logic
 - Kafka-based analytics event processing
 
+Features
+
+- Full patient CRUD — create, read, update, delete patients
+- Email uniqueness validation
+- Input validation with custom validation groups
+- Global exception handling with structured error responses
+- gRPC communication between patient and billing services
+- Kafka event publishing on patient creation
+- JWT-based authentication
+- Swagger UI API documentation
+- Fully containerized with Docker Compose
+- Health checks for dependent services
+
 ## Services
 
 - **api-gateway** — public entrypoint and route proxy
