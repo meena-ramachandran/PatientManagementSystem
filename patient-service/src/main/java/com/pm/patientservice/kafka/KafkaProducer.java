@@ -20,18 +20,22 @@ public class KafkaProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void sendEvent(Patient patient){
+    public void sendEvent(Patient patient) {
+        sendEvent(patient, "PATIENT_CREATED");
+    }
+
+    public void sendEvent(Patient patient, String eventType) {
         PatientEvent patientEvent = PatientEvent.newBuilder()
                 .setPatientId(patient.getId().toString())
                 .setName(patient.getName())
                 .setEmail(patient.getEmail())
-                .setEventType("PATIENT_CREATED")
+                .setEventType(eventType)
                 .build();
 
-        try{
+        try {
             kafkaTemplate.send("patient", patientEvent.toByteArray());
             log.info("Sent Kafka event for patient: {}", patientEvent.toString());
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             log.error("Failed to send Kafka event for patient: {}", patientEvent.toString());
         }

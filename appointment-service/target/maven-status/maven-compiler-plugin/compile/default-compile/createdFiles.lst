@@ -2,10 +2,13 @@ user/UserServiceGrpc$UserServiceBlockingStub.class
 billing/BillingServiceOuterClass.class
 user/GetUserRequest$1.class
 user/GetUserResponseOrBuilder.class
+billing/BillingAmountRequest.class
 appointment/events/AppointmentEventOrBuilder.class
 billing/BillingServiceGrpc$BillingServiceFutureStub.class
+billing/BillingPatientRequest$1.class
 user/UserServiceGrpc$UserServiceFileDescriptorSupplier.class
 com/pm/appointmentservice/mapper/AppointmentMapper.class
+billing/BillingAmountRequest$Builder.class
 billing/BillingResponse$1.class
 billing/BillingServiceGrpc$BillingServiceStub.class
 appointment/events/AppointmentEvent$Builder.class
@@ -32,8 +35,10 @@ com/pm/appointmentservice/controller/AppointmentController.class
 appointment/events/AppointmentEventOuterClass.class
 billing/BillingServiceGrpc$AsyncService.class
 user/GetUserRequest$Builder.class
+billing/BillingAmountRequestOrBuilder.class
 appointment/events/AppointmentEvent.class
 user/UserServiceGrpc$UserServiceBaseDescriptorSupplier.class
+billing/BillingPatientRequest$Builder.class
 com/pm/appointmentservice/grpc/BillingServiceGrpcClient.class
 billing/BillingRequest.class
 user/UserServiceGrpc$2.class
@@ -42,9 +47,11 @@ com/pm/appointmentservice/kafka/KafkaProducer.class
 billing/BillingResponseOrBuilder.class
 user/UserServiceGrpc$UserServiceStub.class
 user/GetUserRequestOrBuilder.class
+billing/BillingPatientRequest.class
 user/UserServiceOuterClass.class
 user/GetUserRequest.class
 com/pm/appointmentservice/service/AppointmentService.class
+billing/BillingAmountRequest$1.class
 billing/BillingServiceGrpc$BillingServiceFileDescriptorSupplier.class
 user/UserServiceGrpc$MethodHandlers.class
 user/UserServiceGrpc$3.class
@@ -56,5 +63,6 @@ billing/BillingRequestOrBuilder.class
 com/pm/appointmentservice/dto/AppointmentRequestDTO.class
 user/UserServiceGrpc.class
 billing/BillingResponse$Builder.class
+billing/BillingPatientRequestOrBuilder.class
 user/UserServiceGrpc$UserServiceMethodDescriptorSupplier.class
 billing/BillingServiceGrpc$BillingServiceBaseDescriptorSupplier.class

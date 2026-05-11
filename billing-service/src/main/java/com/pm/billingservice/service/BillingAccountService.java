@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.pm.billingservice.dto.BillingAccountRequestDTO;
 import com.pm.billingservice.dto.BillingAccountResponseDTO;
 import com.pm.billingservice.exception.BillingAccountNotFoundException;
+import com.pm.billingservice.kafka.BillingKafkaProducer;
 import com.pm.billingservice.mapper.BillingAccountMapper;
 import com.pm.billingservice.model.BillingAccount;
 import com.pm.billingservice.repository.BillingAccountRepository;
@@ -17,9 +18,11 @@ import com.pm.billingservice.repository.BillingAccountRepository;
 public class BillingAccountService {
 
     private final BillingAccountRepository repository;
+    private final BillingKafkaProducer kafkaProducer;
 
-    public BillingAccountService(BillingAccountRepository repository) {
+    public BillingAccountService(BillingAccountRepository repository, BillingKafkaProducer kafkaProducer) {
         this.repository = repository;
+        this.kafkaProducer = kafkaProducer;
     }
 
     public List<BillingAccountResponseDTO> getAllAccounts() {
@@ -40,6 +43,7 @@ public class BillingAccountService {
                 .orElseGet(() -> {
                     BillingAccount account = BillingAccountMapper.toEntity(request);
                     BillingAccount saved = repository.save(account);
+                    kafkaProducer.sendEvent("BILLING_ACCOUNT_CREATED", saved, null);
                     return BillingAccountMapper.toResponseDTO(saved);
                 });
     }
@@ -55,6 +59,7 @@ public class BillingAccountService {
             existing.setBalance(request.getBalance());
         }
         BillingAccount updated = repository.save(existing);
+        kafkaProducer.sendEvent("BILLING_ACCOUNT_UPDATED", updated, updated.getBalance().toPlainString());
         return BillingAccountMapper.toResponseDTO(updated);
     }
 
@@ -63,6 +68,7 @@ public class BillingAccountService {
                 .orElseThrow(() -> new BillingAccountNotFoundException("Billing account not found with id: " + id));
         existing.setBalance(existing.getBalance().add(amount));
         BillingAccount updated = repository.save(existing);
+        kafkaProducer.sendEvent("BILLING_ACCOUNT_CREDITED", updated, amount.toPlainString());
         return BillingAccountMapper.toResponseDTO(updated);
     }
 
@@ -71,19 +77,21 @@ public class BillingAccountService {
                 .orElseThrow(() -> new BillingAccountNotFoundException("Billing account not found with id: " + id));
         existing.setBalance(existing.getBalance().subtract(amount));
         BillingAccount updated = repository.save(existing);
+        kafkaProducer.sendEvent("BILLING_ACCOUNT_CHARGED", updated, amount.toPlainString());
         return BillingAccountMapper.toResponseDTO(updated);
     }
 
     public void deleteAccount(UUID id) {
-        if (!repository.existsById(id)) {
-            throw new BillingAccountNotFoundException("Billing account not found with id: " + id);
-        }
+        BillingAccount existing = repository.findById(id)
+                .orElseThrow(() -> new BillingAccountNotFoundException("Billing account not found with id: " + id));
+        kafkaProducer.sendEvent("BILLING_ACCOUNT_DELETED", existing, null);
         repository.deleteById(id);
     }
 
     public BillingAccountResponseDTO deleteAccountByPatientId(String patientId) {
         BillingAccount existing = repository.findByPatientId(patientId)
                 .orElseThrow(() -> new BillingAccountNotFoundException("Billing account not found for patient id: " + patientId));
+        kafkaProducer.sendEvent("BILLING_ACCOUNT_DELETED", existing, null);
         repository.delete(existing);
         return BillingAccountMapper.toResponseDTO(existing);
     }

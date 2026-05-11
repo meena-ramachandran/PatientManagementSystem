@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pm.amalyticsservice.dto.AnalyticsEventRequestDTO;
 import com.pm.amalyticsservice.dto.AnalyticsEventResponseDTO;
+import com.pm.amalyticsservice.dto.AnalyticsSummaryDTO;
 import com.pm.amalyticsservice.service.AnalyticsEventService;
 
 @RestController
@@ -30,8 +32,17 @@ public class AnalyticsEventController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AnalyticsEventResponseDTO>> getAll() {
-        return ResponseEntity.ok(analyticsEventService.getAllEvents());
+    public ResponseEntity<List<AnalyticsEventResponseDTO>> getAll(
+            @RequestParam(required = false) String eventType,
+            @RequestParam(required = false) String patientId) {
+        return ResponseEntity.ok(analyticsEventService.getEvents(eventType, patientId));
+    }
+
+    @GetMapping("/summary")
+    public ResponseEntity<AnalyticsSummaryDTO> getSummary(
+            @RequestParam(required = false) String eventType,
+            @RequestParam(required = false) String patientId) {
+        return ResponseEntity.ok(analyticsEventService.getSummary(eventType, patientId));
     }
 
     @GetMapping("/{id}")

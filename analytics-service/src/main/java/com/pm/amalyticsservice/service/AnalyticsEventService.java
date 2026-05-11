@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.pm.amalyticsservice.dto.AnalyticsEventRequestDTO;
 import com.pm.amalyticsservice.dto.AnalyticsEventResponseDTO;
+import com.pm.amalyticsservice.dto.AnalyticsSummaryDTO;
 import com.pm.amalyticsservice.exception.AnalyticsEventNotFoundException;
 import com.pm.amalyticsservice.mapper.AnalyticsEventMapper;
 import com.pm.amalyticsservice.model.AnalyticsEvent;
@@ -26,6 +27,32 @@ public class AnalyticsEventService {
         return repository.findAll().stream()
                 .map(AnalyticsEventMapper::toResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    public List<AnalyticsEventResponseDTO> getEvents(String eventType, String patientId) {
+        return repository.findAll().stream()
+                .filter(event -> eventType == null || eventType.isBlank()
+                        || event.getEventType().equalsIgnoreCase(eventType))
+                .filter(event -> patientId == null || patientId.isBlank()
+                        || event.getPatientId().equals(patientId))
+                .map(AnalyticsEventMapper::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public AnalyticsSummaryDTO getSummary(String eventType, String patientId) {
+        var filtered = repository.findAll().stream()
+                .filter(event -> eventType == null || eventType.isBlank()
+                        || event.getEventType().equalsIgnoreCase(eventType))
+                .filter(event -> patientId == null || patientId.isBlank()
+                        || event.getPatientId().equals(patientId))
+                .toList();
+
+        AnalyticsSummaryDTO summary = new AnalyticsSummaryDTO();
+        summary.setEventType(eventType);
+        summary.setPatientId(patientId);
+        summary.setEventCount(filtered.size());
+        summary.setUniquePatientCount((int) filtered.stream().map(AnalyticsEvent::getPatientId).distinct().count());
+        return summary;
     }
 
     public AnalyticsEventResponseDTO getEventById(UUID id) {

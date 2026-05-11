@@ -12,6 +12,14 @@ spring:
                   filters:
                     - StripPrefix=1
 
+                - id: users-service-route
+                  uri: http://auth-service:4005
+                  predicates:
+                    - Path=/api/users/**
+                  filters:
+                    - StripPrefix=1
+                    - JwtValidation
+
                 - id: api-docs-auth-route
                   uri: http://auth-service:4005
                   predicates:

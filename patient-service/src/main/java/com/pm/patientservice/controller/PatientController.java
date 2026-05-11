@@ -38,8 +38,10 @@ public class PatientController {
 
     @GetMapping
     @Operation(summary = "Get all patients", description = "Retrieve a list of all patients")
-    public ResponseEntity<List<PatientResponseDTO>> getPatients() {
-        List<PatientResponseDTO> patientResponseDTOs = patientService.getPatients();
+    public ResponseEntity<List<PatientResponseDTO>> getPatients(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String name,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String email) {
+        List<PatientResponseDTO> patientResponseDTOs = patientService.getPatients(name, email);
         return ResponseEntity.ok(patientResponseDTOs);
     }
 

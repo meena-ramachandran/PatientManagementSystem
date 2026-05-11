@@ -28,13 +28,21 @@ public class PatientService {
         this.kafkaProducer = kafkaProducer;
     }
 
-    public List<PatientResponseDTO> getPatients() {
-        List<Patient> patients = patientRepository.findAll();
-        List<PatientResponseDTO> patientResponseDTOs = patients.stream()
-                .map(patient -> PatientMapper.toPatientResponseDTO(patient))
-                .toList();
+    public List<PatientResponseDTO> getPatients(String name, String email) {
+        List<Patient> patients;
+        if (name != null && !name.isBlank() && email != null && !email.isBlank()) {
+            patients = patientRepository.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(name, email);
+        } else if (name != null && !name.isBlank()) {
+            patients = patientRepository.findByNameContainingIgnoreCase(name);
+        } else if (email != null && !email.isBlank()) {
+            patients = patientRepository.findByEmailContainingIgnoreCase(email);
+        } else {
+            patients = patientRepository.findAll();
+        }
 
-        return patientResponseDTOs;
+        return patients.stream()
+                .map(PatientMapper::toPatientResponseDTO)
+                .toList();
     }
 
     public PatientResponseDTO createPatient(PatientRequestDTO patientRequestDTO) {
@@ -47,7 +55,7 @@ public class PatientService {
 
         billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(), newPatient.getName(), newPatient.getEmail());
 
-        kafkaProducer.sendEvent(newPatient);
+        kafkaProducer.sendEvent(newPatient, "PATIENT_CREATED");
 
         return PatientMapper.toPatientResponseDTO(newPatient);
     }
@@ -68,14 +76,16 @@ public class PatientService {
 
         Patient updatedPatient = patientRepository.save(existingPatient);
 
+        kafkaProducer.sendEvent(updatedPatient, "PATIENT_UPDATED");
+
         return PatientMapper.toPatientResponseDTO(updatedPatient);
     }
 
     public void deletePatient(UUID id) {
-        if (!patientRepository.existsById(id)) {
-            throw new PatientNotFoundException("Patient not found with id: " + id);
-        }
+        Patient existingPatient = patientRepository.findById(id)
+                .orElseThrow(() -> new PatientNotFoundException("Patient not found with id: " + id));
 
+        kafkaProducer.sendEvent(existingPatient, "PATIENT_DELETED");
         billingServiceGrpcClient.deleteBillingAccountByPatientId(id.toString());
         patientRepository.deleteById(id);
     }

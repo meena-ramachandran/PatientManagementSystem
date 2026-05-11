@@ -62,6 +62,12 @@ public class AppointmentService {
 
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO request) {
         Map<String, Object> patientInfo = validatePatient(request.getPatientId());
+        UUID patientUuid = UUID.fromString(request.getPatientId());
+        UUID userUuid = UUID.fromString(request.getUserId());
+        LocalDateTime appointmentDateTime = LocalDateTime.parse(request.getAppointmentDateTime());
+
+        validateAppointmentAvailability(patientUuid, userUuid, appointmentDateTime, null);
+
         if (!authServiceGrpcClient.userExists(request.getUserId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "User not found with id: " + request.getUserId());
@@ -89,15 +95,21 @@ public class AppointmentService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Appointment not found with id: " + id));
 
-        if (!existing.getPatientId().toString().equals(request.getPatientId())) {
+        UUID newPatientId = UUID.fromString(request.getPatientId());
+        UUID newUserId = UUID.fromString(request.getUserId());
+        LocalDateTime newAppointmentDateTime = LocalDateTime.parse(request.getAppointmentDateTime());
+
+        if (!existing.getPatientId().equals(newPatientId)) {
             validatePatient(request.getPatientId());
-            existing.setPatientId(UUID.fromString(request.getPatientId()));
+            existing.setPatientId(newPatientId);
         }
 
         if (!authServiceGrpcClient.userExists(request.getUserId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "User not found with id: " + request.getUserId());
         }
+
+        validateAppointmentAvailability(newPatientId, newUserId, newAppointmentDateTime, id);
 
         BigDecimal newFee = request.getAppointmentFee() != null ? request.getAppointmentFee() : existing.getAppointmentFee();
         BigDecimal existingFee = existing.getAppointmentFee() != null ? existing.getAppointmentFee() : DEFAULT_APPOINTMENT_FEE;
@@ -112,8 +124,8 @@ public class AppointmentService {
         }
 
         existing.setAppointmentFee(newFee);
-        existing.setUserId(UUID.fromString(request.getUserId()));
-        existing.setAppointmentDateTime(LocalDateTime.parse(request.getAppointmentDateTime()));
+        existing.setUserId(newUserId);
+        existing.setAppointmentDateTime(newAppointmentDateTime);
         existing.setStatus(request.getStatus());
         existing.setNotes(request.getNotes());
 
@@ -132,7 +144,33 @@ public class AppointmentService {
                     appointment.getAppointmentFee().toPlainString());
         }
 
+        kafkaProducer.sendEvent(appointment, "APPOINTMENT_DELETED");
         appointmentRepository.deleteById(id);
+    }
+
+    private void validateAppointmentAvailability(UUID patientId, UUID userId, LocalDateTime appointmentDateTime,
+            UUID currentAppointmentId) {
+        if (currentAppointmentId == null) {
+            if (appointmentRepository.existsByPatientIdAndAppointmentDateTime(patientId, appointmentDateTime)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Patient already has an appointment at this time.");
+            }
+            if (appointmentRepository.existsByUserIdAndAppointmentDateTime(userId, appointmentDateTime)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "User already has an appointment at this time.");
+            }
+        } else {
+            if (appointmentRepository.existsByPatientIdAndAppointmentDateTimeAndIdNot(patientId, appointmentDateTime,
+                    currentAppointmentId)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Patient already has an appointment at this time.");
+            }
+            if (appointmentRepository.existsByUserIdAndAppointmentDateTimeAndIdNot(userId, appointmentDateTime,
+                    currentAppointmentId)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "User already has an appointment at this time.");
+            }
+        }
     }
 
     private Map<String, Object> validatePatient(String patientId) {

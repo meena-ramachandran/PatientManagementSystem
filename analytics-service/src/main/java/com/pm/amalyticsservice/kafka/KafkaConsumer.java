@@ -1,5 +1,9 @@
 package com.pm.amalyticsservice.kafka;
 
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -58,6 +62,32 @@ public class KafkaConsumer {
         }catch(InvalidProtocolBufferException e){
             log.error("Error deserializing appointment event: {}", e.getMessage());
         }
+    }
+
+    @KafkaListener(topics = "billing", groupId = "analytics-service")
+    public void consumeBillingEvent(byte[] event){
+        try{
+            String payload = new String(event, StandardCharsets.UTF_8);
+            String patientId = extractJsonField(payload, "patientId");
+            String eventType = extractJsonField(payload, "eventType");
+            String details = extractJsonField(payload, "details");
+
+            AnalyticsEventRequestDTO request = new AnalyticsEventRequestDTO();
+            request.setPatientId(patientId != null ? patientId : "");
+            request.setEventType(eventType != null ? eventType : "BILLING_EVENT");
+            request.setDetails(details != null ? details : payload);
+
+            var saved = analyticsEventService.createEvent(request);
+            log.info("Persisted analytics billing event with id={} from Kafka message", saved.getId());
+        }catch(Exception e){
+            log.error("Error processing billing event: {}", e.getMessage(), e);
+        }
+    }
+
+    private String extractJsonField(String payload, String fieldName) {
+        Pattern pattern = Pattern.compile("\\\"" + Pattern.quote(fieldName) + "\\\"\\s*:\\s*\\\"([^\\\"]*)\\\"");
+        Matcher matcher = pattern.matcher(payload);
+        return matcher.find() ? matcher.group(1) : null;
     }
 
 }
