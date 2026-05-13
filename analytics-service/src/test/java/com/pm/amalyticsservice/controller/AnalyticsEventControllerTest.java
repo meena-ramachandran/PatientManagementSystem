@@ -12,18 +12,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
-import java.util.UUID;
-
+//import java.util.List;
 import com.pm.amalyticsservice.dto.AnalyticsEventRequestDTO;
 import com.pm.amalyticsservice.dto.AnalyticsEventResponseDTO;
 import com.pm.amalyticsservice.service.AnalyticsEventService;
-
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+
 
 class AnalyticsEventControllerTest {
 

@@ -7,8 +7,12 @@ import com.pm.patientservice.model.Patient;
 
 import patient.events.PatientEvent;
 
+import java.nio.charset.StandardCharsets;
+
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 @Service
 public class KafkaProducer {
@@ -35,6 +39,26 @@ public class KafkaProducer {
         try {
             kafkaTemplate.send("patient", patientEvent.toByteArray());
             log.info("Sent Kafka event for patient: {}", patientEvent.toString());
+
+            String correlationId = MDC.get("correlationId");
+
+            ProducerRecord<String, byte[]> record =new ProducerRecord<>(
+                            "patient-events",
+                            patientEvent.toByteArray()
+                    );
+
+            if (correlationId != null) {
+                record.headers().add(
+                        "X-Correlation-Id",
+                        correlationId.getBytes(StandardCharsets.UTF_8)
+                );
+            }
+            kafkaTemplate.send(record);
+            log.info(
+                    "Patient event sent for patientId={} eventType={}",
+                    patient.getId(),
+                    eventType
+            );
         } catch (Exception e) {
             e.printStackTrace();
             log.error("Failed to send Kafka event for patient: {}", patientEvent.toString());

@@ -1,6 +1,6 @@
 package com.pm.authservice.config;
 
-import java.security.Security;
+//import java.security.Security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

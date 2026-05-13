@@ -1,5 +1,6 @@
 package com.pm.appointmentservice.grpc;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +19,15 @@ public class BillingServiceGrpcClient {
     private final BillingServiceGrpc.BillingServiceBlockingStub blockingStub;
     private static final Logger log = LoggerFactory.getLogger(BillingServiceGrpcClient.class);
 
+
+
+
     public BillingServiceGrpcClient(@Value("${billing.service.address:billing-service}") String serverAddress,
-            @Value("${billing.service.port:9095}") int serverPort) {
+            @Value("${billing.service.port:9095}") int serverPort,
+            GrpcClientInterceptor grpcClientInterceptor) {
         log.info("Connecting to BillingService at {}:{}", serverAddress, serverPort);
 
-        ManagedChannel channel = ManagedChannelBuilder.forAddress(serverAddress, serverPort).usePlaintext().build();
+        ManagedChannel channel = ManagedChannelBuilder.forAddress(serverAddress, serverPort).usePlaintext().intercept(grpcClientInterceptor).build();
         blockingStub = BillingServiceGrpc.newBlockingStub(channel);
     }
 

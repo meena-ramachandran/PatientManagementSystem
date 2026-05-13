@@ -13,11 +13,15 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import appointment.events.AppointmentEvent;
 import patient.events.PatientEvent;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pm.amalyticsservice.dto.AnalyticsEventRequestDTO;
 import com.pm.amalyticsservice.service.AnalyticsEventService;
+
+import org.apache.kafka.common.header.Header;
+import org.slf4j.MDC;
 
 @Service
 public class KafkaConsumer {
@@ -31,8 +35,8 @@ public class KafkaConsumer {
     }
 
     @KafkaListener(topics = "patient", groupId = "analytics-service")
-    public void consumeEvent(byte[] event){
-        try{
+    public void consumeEvent(byte[] event) {
+        try {
             PatientEvent patientEvent = PatientEvent.parseFrom(ByteString.copyFrom(event));
 
             AnalyticsEventRequestDTO request = new AnalyticsEventRequestDTO();
@@ -42,31 +46,32 @@ public class KafkaConsumer {
 
             var saved = analyticsEventService.createEvent(request);
             log.info("Persisted analytics event with id={} from Kafka message", saved.getId());
-        }catch(InvalidProtocolBufferException e){
+        } catch (InvalidProtocolBufferException e) {
             log.error("Error deserializing patient event: {}", e.getMessage());
         }
     }
 
     @KafkaListener(topics = "appointment", groupId = "analytics-service")
-    public void consumeAppointmentEvent(byte[] event){
-        try{
+    public void consumeAppointmentEvent(byte[] event) {
+        try {
             AppointmentEvent appointmentEvent = AppointmentEvent.parseFrom(ByteString.copyFrom(event));
 
             AnalyticsEventRequestDTO request = new AnalyticsEventRequestDTO();
             request.setPatientId(appointmentEvent.getPatientId());
             request.setEventType(appointmentEvent.getEventType());
-            request.setDetails("appointmentId=" + appointmentEvent.getAppointmentId() + ", userId=" + appointmentEvent.getUserId() + ", status=" + appointmentEvent.getStatus());
+            request.setDetails("appointmentId=" + appointmentEvent.getAppointmentId() + ", userId="
+                    + appointmentEvent.getUserId() + ", status=" + appointmentEvent.getStatus());
 
             var saved = analyticsEventService.createEvent(request);
             log.info("Persisted analytics appointment event with id={} from Kafka message", saved.getId());
-        }catch(InvalidProtocolBufferException e){
+        } catch (InvalidProtocolBufferException e) {
             log.error("Error deserializing appointment event: {}", e.getMessage());
         }
     }
 
     @KafkaListener(topics = "billing", groupId = "analytics-service")
-    public void consumeBillingEvent(byte[] event){
-        try{
+    public void consumeBillingEvent(byte[] event) {
+        try {
             String payload = new String(event, StandardCharsets.UTF_8);
             String patientId = extractJsonField(payload, "patientId");
             String eventType = extractJsonField(payload, "eventType");
@@ -79,8 +84,37 @@ public class KafkaConsumer {
 
             var saved = analyticsEventService.createEvent(request);
             log.info("Persisted analytics billing event with id={} from Kafka message", saved.getId());
-        }catch(Exception e){
+        } catch (Exception e) {
             log.error("Error processing billing event: {}", e.getMessage(), e);
+        }
+    }
+
+    @KafkaListener(topics = "patient-events")
+    public void consume(
+            ConsumerRecord<String, byte[]> record) {
+
+        Header header = record.headers()
+                .lastHeader("X-Correlation-Id");
+
+        if (header != null) {
+            String correlationId = new String(
+                    header.value(),
+                    StandardCharsets.UTF_8);
+            MDC.put("correlationId", correlationId);
+        }
+
+        try {
+            PatientEvent patientEvent = PatientEvent.parseFrom(
+                    record.value());
+            log.info(
+                    "Received patient event for patientId={}",
+                    patientEvent.getPatientId());
+        } catch (InvalidProtocolBufferException e) {
+            log.error(
+                    "Failed to deserialize protobuf message",
+                    e);
+        } finally {
+            MDC.clear();
         }
     }
 

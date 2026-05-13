@@ -1,11 +1,12 @@
 package com.pm.patientservice.grpc;
 
-import org.hibernate.engine.spi.Managed;
+//import org.hibernate.engine.spi.Managed;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import billing.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+//import org.springframework.beans.factory.annotation.Autowired;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +18,11 @@ public class BillingServiceGrpcClient {
     private final BillingServiceGrpc.BillingServiceBlockingStub blockingStub;
     private static final Logger log = LoggerFactory.getLogger(BillingServiceGrpcClient.class);
 
-    public BillingServiceGrpcClient(@Value("${billing.service.address:localhost}") String serverAddress, @Value("${billing.service.port:9095}") int serverPort) {
+
+    public BillingServiceGrpcClient(@Value("${billing.service.address:localhost}") String serverAddress, @Value("${billing.service.port:9095}") int serverPort, GrpcClientInterceptor grpcClientInterceptor) {
         log.info("Connecting to BillingService at {}:{}", serverAddress, serverPort);
 
-        ManagedChannel channel = ManagedChannelBuilder.forAddress(serverAddress, serverPort).usePlaintext().build();
+        ManagedChannel channel = ManagedChannelBuilder.forAddress(serverAddress, serverPort).usePlaintext().intercept(grpcClientInterceptor).build();
 
         blockingStub = BillingServiceGrpc.newBlockingStub(channel);
     }
