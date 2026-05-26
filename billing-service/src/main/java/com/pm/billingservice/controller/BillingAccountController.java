@@ -31,7 +31,11 @@ public class BillingAccountController {
     }
 
     @GetMapping
-    public ResponseEntity<List<BillingAccountResponseDTO>> getAll() {
+    public ResponseEntity<List<BillingAccountResponseDTO>> getAll(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String patientId) {
+        if (patientId != null) {
+            return ResponseEntity.ok(billingAccountService.getAccountByPatientId(patientId));
+        }
         return ResponseEntity.ok(billingAccountService.getAllAccounts());
     }
 

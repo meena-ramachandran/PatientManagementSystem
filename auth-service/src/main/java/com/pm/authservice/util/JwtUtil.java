@@ -39,16 +39,21 @@ public class JwtUtil {
                 .compact();
     }
 
-    public boolean validateToken(String token) {
+    public io.jsonwebtoken.Claims getClaims(String token) {
         try {
-            Jwts.parser().verifyWith((SecretKey)secretKey)
+            return Jwts.parser().verifyWith((SecretKey)secretKey)
             .build()
-            .parseSignedClaims(token);
-            return true;
+            .parseSignedClaims(token)
+            .getPayload();
         } catch (SignatureException e) {
             throw new JwtException("Invalid JWT Signature: " + e.getMessage());
         } catch (JwtException e) {
             throw new JwtException("Invalid JWT: " + e.getMessage());
         }
+    }
+
+    public boolean validateToken(String token) {
+        getClaims(token);
+        return true;
     }
 }

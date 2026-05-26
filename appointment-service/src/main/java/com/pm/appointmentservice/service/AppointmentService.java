@@ -1,7 +1,9 @@
 package com.pm.appointmentservice.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -47,8 +49,29 @@ public class AppointmentService {
         this.restTemplate = restTemplateBuilder.build();
     }
 
-    public List<AppointmentResponseDTO> getAppointments() {
-        return appointmentRepository.findAll().stream()
+    public List<AppointmentResponseDTO> getAppointments(UUID patientId, UUID userId, String date) {
+        List<Appointment> appointments;
+        if (date != null && !date.isEmpty()) {
+            LocalDate localDate = LocalDate.parse(date);
+            LocalDateTime start = localDate.atStartOfDay();
+            LocalDateTime end = localDate.atTime(LocalTime.MAX);
+            if (patientId != null) {
+                appointments = appointmentRepository.findByPatientIdAndAppointmentDateTimeBetween(patientId, start, end);
+            } else if (userId != null) {
+                appointments = appointmentRepository.findByUserIdAndAppointmentDateTimeBetween(userId, start, end);
+            } else {
+                appointments = appointmentRepository.findByAppointmentDateTimeBetween(start, end);
+            }
+        } else {
+            if (patientId != null) {
+                appointments = appointmentRepository.findByPatientId(patientId);
+            } else if (userId != null) {
+                appointments = appointmentRepository.findByUserId(userId);
+            } else {
+                appointments = appointmentRepository.findAll();
+            }
+        }
+        return appointments.stream()
                 .map(AppointmentMapper::toResponseDTO)
                 .toList();
     }
@@ -65,8 +88,9 @@ public class AppointmentService {
         UUID patientUuid = UUID.fromString(request.getPatientId());
         UUID userUuid = UUID.fromString(request.getUserId());
         LocalDateTime appointmentDateTime = LocalDateTime.parse(request.getAppointmentDateTime());
+        int durationMinutes = request.getDurationMinutes() != null ? request.getDurationMinutes() : 30;
 
-        validateAppointmentAvailability(patientUuid, userUuid, appointmentDateTime, null);
+        validateAppointmentAvailability(patientUuid, userUuid, appointmentDateTime, durationMinutes, null);
 
         if (!authServiceGrpcClient.userExists(request.getUserId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -109,7 +133,8 @@ public class AppointmentService {
                     "User not found with id: " + request.getUserId());
         }
 
-        validateAppointmentAvailability(newPatientId, newUserId, newAppointmentDateTime, id);
+        int durationMinutes = request.getDurationMinutes() != null ? request.getDurationMinutes() : 30;
+        validateAppointmentAvailability(newPatientId, newUserId, newAppointmentDateTime, durationMinutes, id);
 
         BigDecimal newFee = request.getAppointmentFee() != null ? request.getAppointmentFee() : existing.getAppointmentFee();
         BigDecimal existingFee = existing.getAppointmentFee() != null ? existing.getAppointmentFee() : DEFAULT_APPOINTMENT_FEE;
@@ -123,6 +148,7 @@ public class AppointmentService {
             }
         }
 
+        existing.setDurationMinutes(durationMinutes);
         existing.setAppointmentFee(newFee);
         existing.setUserId(newUserId);
         existing.setAppointmentDateTime(newAppointmentDateTime);
@@ -148,27 +174,37 @@ public class AppointmentService {
         appointmentRepository.deleteById(id);
     }
 
-    private void validateAppointmentAvailability(UUID patientId, UUID userId, LocalDateTime appointmentDateTime,
+    private void validateAppointmentAvailability(UUID patientId, UUID userId, LocalDateTime newStart, int durationMinutes,
             UUID currentAppointmentId) {
-        if (currentAppointmentId == null) {
-            if (appointmentRepository.existsByPatientIdAndAppointmentDateTime(patientId, appointmentDateTime)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Patient already has an appointment at this time.");
+        LocalDateTime newEnd = newStart.plusMinutes(durationMinutes);
+
+        // Fetch patient's appointments
+        List<Appointment> patientAppts = appointmentRepository.findByPatientId(patientId);
+        for (Appointment appt : patientAppts) {
+            if (currentAppointmentId != null && appt.getId().equals(currentAppointmentId)) {
+                continue;
             }
-            if (appointmentRepository.existsByUserIdAndAppointmentDateTime(userId, appointmentDateTime)) {
+            int dur = appt.getDurationMinutes() != null ? appt.getDurationMinutes() : 30;
+            LocalDateTime start = appt.getAppointmentDateTime();
+            LocalDateTime end = start.plusMinutes(dur);
+            if (newStart.isBefore(end) && start.isBefore(newEnd)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "User already has an appointment at this time.");
+                        "Patient already has an overlapping appointment between " + start + " and " + end);
             }
-        } else {
-            if (appointmentRepository.existsByPatientIdAndAppointmentDateTimeAndIdNot(patientId, appointmentDateTime,
-                    currentAppointmentId)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Patient already has an appointment at this time.");
+        }
+
+        // Fetch doctor's appointments
+        List<Appointment> doctorAppts = appointmentRepository.findByUserId(userId);
+        for (Appointment appt : doctorAppts) {
+            if (currentAppointmentId != null && appt.getId().equals(currentAppointmentId)) {
+                continue;
             }
-            if (appointmentRepository.existsByUserIdAndAppointmentDateTimeAndIdNot(userId, appointmentDateTime,
-                    currentAppointmentId)) {
+            int dur = appt.getDurationMinutes() != null ? appt.getDurationMinutes() : 30;
+            LocalDateTime start = appt.getAppointmentDateTime();
+            LocalDateTime end = start.plusMinutes(dur);
+            if (newStart.isBefore(end) && start.isBefore(newEnd)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "User already has an appointment at this time.");
+                        "Physician already has an overlapping appointment between " + start + " and " + end);
             }
         }
     }

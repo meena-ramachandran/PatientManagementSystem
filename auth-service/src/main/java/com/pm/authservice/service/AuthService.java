@@ -42,4 +42,12 @@ public class AuthService {
         
     }
 
+    public Optional<io.jsonwebtoken.Claims> getClaims(String token) {
+        try {
+            return Optional.of(jwtUtil.getClaims(token));
+        } catch (JwtException e) {
+            return Optional.empty();
+        }
+    }
+
 }

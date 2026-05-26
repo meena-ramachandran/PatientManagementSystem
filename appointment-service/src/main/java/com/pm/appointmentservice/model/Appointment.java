@@ -36,6 +36,9 @@ public class Appointment {
     @Column(name = "appointment_date_time", nullable = false)
     private LocalDateTime appointmentDateTime;
 
+    @Column(name = "duration_minutes", nullable = false)
+    private Integer durationMinutes = 30;
+
     @Column(nullable = false)
     private String status;
 
@@ -128,5 +131,13 @@ public class Appointment {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Integer getDurationMinutes() {
+        return durationMinutes;
+    }
+
+    public void setDurationMinutes(Integer durationMinutes) {
+        this.durationMinutes = durationMinutes;
     }
 }

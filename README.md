@@ -1,5 +1,8 @@
 # Patient Management System Microservice Platform
 
+> [!IMPORTANT]
+> **Comprehensive System Documentation**: For a detailed guide covering business use cases, system architecture, production-grade features, gRPC/Kafka flows, API specifications, and the Developer Integration Manual, please refer to the master **[SYSTEM_DOCUMENTATION.md](file:///Users/meena/.gemini/antigravity/scratch/PatientManagementSystem/SYSTEM_DOCUMENTATION.md)**.
+
 ## Overview
 
 This repository contains a Java 21 Spring Boot microservices platform for a healthcare-style patient management system.

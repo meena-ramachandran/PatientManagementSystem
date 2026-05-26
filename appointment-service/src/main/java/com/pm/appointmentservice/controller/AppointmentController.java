@@ -32,8 +32,11 @@ public class AppointmentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AppointmentResponseDTO>> getAppointments() {
-        return ResponseEntity.ok(appointmentService.getAppointments());
+    public ResponseEntity<List<AppointmentResponseDTO>> getAppointments(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) UUID patientId,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) UUID userId,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String date) {
+        return ResponseEntity.ok(appointmentService.getAppointments(patientId, userId, date));
     }
 
     @GetMapping("/{id}")
