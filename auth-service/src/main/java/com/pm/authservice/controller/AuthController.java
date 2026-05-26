@@ -12,10 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.pm.authservice.dto.LoginRequestDTO;
 import com.pm.authservice.dto.LoginResponseDTO;
+import com.pm.authservice.dto.UserRequestDTO;
+import com.pm.authservice.dto.UserResponseDTO;
 import com.pm.authservice.dto.DoctorRequestDTO;
 import com.pm.authservice.dto.DoctorResponseDTO;
 import com.pm.authservice.model.Doctor;
+import com.pm.authservice.model.User;
 import com.pm.authservice.service.AuthService;
+import com.pm.authservice.service.UserService;
 import com.pm.authservice.service.DoctorService;
 import jakarta.validation.Valid;
 
@@ -25,10 +29,12 @@ import io.swagger.v3.oas.annotations.Operation;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserService userService;
     private final DoctorService doctorService;
 
-    public AuthController(AuthService authService, DoctorService doctorService) {
+    public AuthController(AuthService authService, UserService userService, DoctorService doctorService) {
         this.authService = authService;
+        this.userService = userService;
         this.doctorService = doctorService;
     }
 
@@ -46,7 +52,24 @@ public class AuthController {
         
     }
 
-    @Operation(summary = "Register Doctor", description = "Public registration endpoint for new doctors")
+    @Operation(summary = "Register User", description = "Public registration endpoint for new users (patients, staff)")
+    @PostMapping("/register")
+    public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserRequestDTO request) {
+        User user = new User();
+        user.setEmail(request.getEmail());
+        user.setPassword(request.getPassword());
+        user.setRole(request.getRole());
+
+        User savedUser = userService.createUser(user);
+
+        UserResponseDTO response = new UserResponseDTO();
+        response.setId(savedUser.getId().toString());
+        response.setEmail(savedUser.getEmail());
+        response.setRole(savedUser.getRole());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(summary = "Register Doctor", description = "Public registration endpoint for new doctors (creates user + doctor profile)")
     @PostMapping("/register-doctor")
     public ResponseEntity<DoctorResponseDTO> registerDoctor(@Valid @RequestBody DoctorRequestDTO request) {
         Doctor doctor = doctorService.createDoctor(request);
