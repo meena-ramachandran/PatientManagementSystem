@@ -49,4 +49,10 @@ class PatientMapperTest {
         assertEquals(LocalDate.of(1985, 5, 5), patient.getDateOfBirth());
         assertEquals(LocalDate.of(2024, 4, 1), patient.getRegisteredDate());
     }
+
+    @Test
+    public void  testException(){
+        var msg = assertThrows(NullPointerException.class, () -> PatientMapper.toPatient(null));
+        System.out.println(msg);
+    }
 }
