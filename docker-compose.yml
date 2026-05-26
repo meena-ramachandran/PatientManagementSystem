@@ -202,6 +202,7 @@ services:
       SPRING_DATASOURCE_USERNAME: admin_viewer
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     networks:
       - internal
     depends_on:

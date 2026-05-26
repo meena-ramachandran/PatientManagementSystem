@@ -31,6 +31,12 @@ public class BillingAccountService {
                 .collect(Collectors.toList());
     }
 
+    public List<BillingAccountResponseDTO> getAccountByPatientId(String patientId) {
+        return repository.findByPatientId(patientId).stream()
+                .map(BillingAccountMapper::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
     public BillingAccountResponseDTO getAccount(UUID id) {
         BillingAccount account = repository.findById(id)
                 .orElseThrow(() -> new BillingAccountNotFoundException("Billing account not found with id: " + id));

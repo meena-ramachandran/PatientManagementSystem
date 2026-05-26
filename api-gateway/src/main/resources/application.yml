@@ -18,7 +18,15 @@ spring:
                     - Path=/api/users/**
                   filters:
                     - StripPrefix=1
-                    - JwtValidation
+                    - JwtValidation=ADMIN
+
+                - id: doctors-service-route
+                  uri: http://auth-service:4005
+                  predicates:
+                    - Path=/api/doctors/**
+                  filters:
+                    - StripPrefix=1
+                    - JwtValidation=ADMIN;PHYSICIAN
 
                 - id: api-docs-auth-route
                   uri: http://auth-service:4005
@@ -33,7 +41,7 @@ spring:
                     - Path=/api/patients/**
                   filters:
                     - StripPrefix=1
-                    - JwtValidation
+                    - JwtValidation=ADMIN;RECEPTIONIST;PHYSICIAN
 
                 - id: billing-service-route
                   uri: http://billing-service:4002
@@ -41,7 +49,7 @@ spring:
                     - Path=/api/billing/**
                   filters:
                     - RewritePath=/api/billing(?<remaining>/?.*),/billing-accounts${remaining}
-                    - JwtValidation
+                    - JwtValidation=ADMIN;RECEPTIONIST;PHYSICIAN;USER
 
                 - id: analytics-service-route
                   uri: http://analytics-service:4004
@@ -49,7 +57,7 @@ spring:
                     - Path=/api/analytics/**
                   filters:
                     - RewritePath=/api/analytics(?<remaining>/?.*),/analytics-events${remaining}
-                    - JwtValidation
+                    - JwtValidation=ADMIN
 
                 - id: appointment-service-route
                   uri: http://appointment-service:4006
@@ -57,7 +65,7 @@ spring:
                     - Path=/api/appointments/**
                   filters:
                     - StripPrefix=1
-                    - JwtValidation
+                    - JwtValidation=ADMIN;RECEPTIONIST;PHYSICIAN;USER
 
                 - id: api-docs-patient-route
                   uri: http://patient-service:4000
